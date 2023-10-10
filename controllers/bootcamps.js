@@ -1,3 +1,4 @@
+const ErrorResponse = require('../utils/errorResponse')
 const Bootcamp = require('../models/Bootcamp')
 // @desc Get all bootcamps
 // @route GET /api/v1/bootcamps
@@ -11,36 +12,31 @@ exports.getBootcamps = async (req, res, next) => {
             data: bootcamps
         })
     } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: "Something went wrong"
-        })
+        next(err)
     }
 }
 
 // @desc Get single bootcamp
 // @route GET /api/v1/bootcamps/:id
 // @access Private
-exports.getBootcamp = async (req, res) => {
+exports.getBootcamp = async (req, res, next) => {
     try {
         const bootcamp = await Bootcamp.findById(req.params.id)
-    if(!bootcamp){
-        return res.status(400).json({
-            success: false,
-            message: "ID does not exist"
-        })
-    }
+        if(!bootcamp){
+            return next(new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404))
+        }
         res.status(200).json({
             success: true,
             data: bootcamp
         })
     } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: "something went wrong"
-        })
+        next(error)
+        // res.status(400).json({
+        //     success: false,
+        //     message: "something went wrong"
+        // })
     }
-    res.status(200).json({ success: true, msg: `Get bootcamp ${req.params.id}`})
+    // res.status(200).json({ success: true, msg: `Get bootcamp ${req.params.id}`})
 }
 
 // @desc Create a new bootcamp
@@ -54,10 +50,7 @@ exports.createBootcamp = async (req, res) => {
         data: bootcamp
     })
     } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: "Something went wrong"
-        })
+        next(err)
     }
     
 }
@@ -72,11 +65,11 @@ exports.updateBootcamp = async (req, res, next) => {
             runValidators: true
         });
         if (!bootcamp){
-            return res.status(400).json({ success: false, message: "Something went wrong"})
+            return next(new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404))
         }
         res.status(200).json({ success: true, data: bootcamp})
     } catch (error) {
-        res.status(400).json({ success: false, message: "Something went wrong"})
+        next(err)
     }
     
 }
@@ -88,10 +81,10 @@ exports.deleteBootcamp = async (req, res) => {
     try {
         const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
         if (!bootcamp){
-            return res.status(400).json({ success: false, message: "Something went wrong"})
+            return next(new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404))
         }
         res.status(200).json({ success: true, data: bootcamp.id})
     } catch (error) {
-        res.status(400).json({ success: false, message: "Something went wrong"})
+        next(err)
     }
 }
